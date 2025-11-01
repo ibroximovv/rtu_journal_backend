@@ -1,0 +1,228 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Journal {
+  id           Int        @id @default(autoincrement())
+  title        String
+  abbreviation String? // qisqartma
+  ISSN         String?
+  description  String?
+  publisher    String? // tashkilot Nomi
+  website_url  String?
+  image        String?
+  status       StatusEnum @default(PENDING)
+  isActive     Boolean    @default(true)
+  user         User       @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  volumes               Volume[]
+  user_id               Int
+  FileAttachmentJournal FileAttachmentJournal[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Volume {
+  id            Int  @id @default(autoincrement())
+  journal_id    Int
+  year          Int
+  volume_number Int?
+
+  journal Journal @relation(fields: [journal_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  issues  Issue[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// 1-son, 2-son ...
+model Issue {
+  id               Int  @id @default(autoincrement())
+  volume_id        Int
+  issue_number     Int?
+  publication_date Int?
+
+  volume   Volume    @relation(fields: [volume_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  articles Article[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Category {
+  id       Int       @id @default(autoincrement())
+  name     String
+  articles Article[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Article {
+  id              Int        @id @default(autoincrement())
+  issue_id        Int
+  title           String
+  abstract        String?
+  doi             String?    @unique
+  submission_date DateTime?
+  acceptance_date DateTime?
+  published_date  DateTime?
+  page_start      Int?
+  page_end        Int?
+  status          StatusEnum @default(PENDING)
+  category_id     Int?
+  isActive        Boolean    @default(true)
+  user            User?      @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  image           String?
+
+  issue       Issue            @relation(fields: [issue_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  category    Category?        @relation(fields: [category_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  authors     ArticleAuthor[]
+  keywords    ArticleKeyword[]
+  attachments FileAttachment[]
+  reviews     Review[]
+  user_id     Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum StatusEnum {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+model Author {
+  id           Int             @id @default(autoincrement())
+  first_name   String?
+  last_name    String?
+  affiliation  String?
+  email        String?         @unique
+  orcid        String?
+  user         User?           @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  articleLinks ArticleAuthor[]
+  user_id      Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ArticleAuthor {
+  id           Int  @id @default(autoincrement())
+  article_id   Int
+  author_id    Int
+  author_order Int?
+
+  article Article @relation(fields: [article_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  author  Author  @relation(fields: [author_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  user    User?   @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  user_id Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([article_id, author_id])
+  @@index([article_id, author_id])
+}
+
+model Keyword {
+  id           Int    @id @default(autoincrement())
+  keyword_text String
+
+  articleLinks ArticleKeyword[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ArticleKeyword {
+  id         Int @id @default(autoincrement())
+  article_id Int
+  keyword_id Int
+
+  article Article @relation(fields: [article_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  keyword Keyword @relation(fields: [keyword_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([article_id, keyword_id])
+  @@index([article_id, keyword_id])
+}
+
+model FileAttachment {
+  id         Int          @id @default(autoincrement())
+  article_id Int
+  file_path  String
+  file_type  FileTypeEnum @default(PDF)
+  article    Article      @relation(fields: [article_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model FileAttachmentJournal {
+  id        Int          @id @default(autoincrement())
+  file_path String
+  file_type FileTypeEnum @default(PDF)
+
+  journal    Journal @relation(fields: [journal_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  journal_id Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum FileTypeEnum {
+  PDF
+  DOC
+  DOCX
+  WORD
+}
+
+model User {
+  id            Int       @id @default(autoincrement())
+  username      String    @unique
+  password_hash String
+  role          UserRole? @default(USER)
+  email         String?   @unique
+  full_name     String?
+  image         String?
+
+  reviews       Review[]
+  Author        Author[]
+  ArticleAuthor ArticleAuthor[]
+  Article       Article[]
+  Journal       Journal[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum UserRole {
+  ADMIN
+  USER
+  STUDENT
+}
+
+model Review {
+  id          Int       @id @default(autoincrement())
+  article_id  Int
+  reviewer_id Int
+  count       Int       @default(1)
+  review_date DateTime?
+  comments    String?
+  decision    String?
+
+  article  Article @relation(fields: [article_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  reviewer User    @relation(fields: [reviewer_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@index([article_id, reviewer_id])
+}
