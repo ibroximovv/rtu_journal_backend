@@ -12,7 +12,7 @@ import { ApiBearerAuth } from '@nestjs/swagger';
 
 @Controller('journal')
 export class JournalController {
-  constructor(private readonly journalService: JournalService) {}
+  constructor(private readonly journalService: JournalService) { }
 
   @RolesDecorator(UserRole.ADMIN)
   @UseGuards(RolesGuard)
@@ -29,8 +29,8 @@ export class JournalController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.journalService.findOne(+id);
+  findOne(@Param('id') id: number) {
+    return this.journalService.findOne({ id });
   }
 
   @RolesDecorator(UserRole.ADMIN)
@@ -38,8 +38,8 @@ export class JournalController {
   @ApiBearerAuth('access-token')
   @UseGuards(AuthGuard)
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateJournalDto: UpdateJournalDto) {
-    return this.journalService.update(+id, updateJournalDto);
+  update(@Param('id') id: number, @Body() updateJournalDto: UpdateJournalDto) {
+    return this.journalService.update({ id }, updateJournalDto);
   }
 
   @RolesDecorator(UserRole.ADMIN)
@@ -47,7 +47,7 @@ export class JournalController {
   @ApiBearerAuth('access-token')
   @UseGuards(AuthGuard)
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.journalService.remove(+id);
+  remove(@Param('id') id: number) {
+    return this.journalService.remove({ id });
   }
 }
