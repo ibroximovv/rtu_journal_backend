@@ -36,7 +36,7 @@ export class JournalMulterController {
     FileInterceptor('file', {
       storage: diskStorage({
         destination: (req, file, cb) => {
-          const uploadPath = join(__dirname, '..', '..', '..', 'uploads', 'journal');
+          const uploadPath = join(process.cwd(), 'uploads', 'journal');
           
           // 📁 Papka mavjud bo‘lmasa — yaratamiz
           if (!fs.existsSync(uploadPath)) {
