@@ -1,36 +1,36 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsNumber, IsOptional, IsString } from "class-validator";
+import { IsBoolean, IsNumber, IsOptional, IsString } from "class-validator";
 
 export class CreateArticleDto {
     @ApiProperty({ example: 1 })
     @IsNumber()
     issue_id: number
 
-    @ApiProperty({ example: "Article title" })
+    @ApiProperty({ example: "The Impact of Artificial Intelligence on Modern Education" })
     @IsString()
     title: string
 
-    @ApiProperty({ example: "Article abstract", required: false })
+    @ApiProperty({ example: "This paper explores how AI tools enhance learning experiences and teacher productivity.", required: false })
     @IsOptional()
     @IsString()
     abstract?: string
 
-    @ApiProperty({ example: "Article doi", required: false })
+    @ApiProperty({ example: "10.1234/ai.2025.001", required: false })
     @IsOptional()
     @IsString()
     doi?: string
 
-    @ApiProperty({ example: "Article submission date", required: false })
+    @ApiProperty({ example: "2025-11-03T12:34:56Z", required: false })
     @IsOptional()
     @IsString()
     submission_date?: string
 
-    @ApiProperty({ example: "Article acceptance date", required: false })
+    @ApiProperty({ example: "2025-11-04T12:34:56Z", required: false })
     @IsOptional()
     @IsString()
     acceptance_date?: string
 
-    @ApiProperty({ example: "Article published date", required: false })
+    @ApiProperty({ example: "2025-11-06T12:34:56Z", required: false })
     @IsOptional()
     @IsString()
     published_date?: string
@@ -49,11 +49,11 @@ export class CreateArticleDto {
     @IsNumber()
     category_id?: number
 
-    @ApiProperty({ example: 1 })
-    @IsNumber()
+    @ApiProperty({ example: true })
+    @IsBoolean()
     isActive: boolean
 
-    @ApiProperty({ example: 'Article image', required: false })
+    @ApiProperty({ example: 'http://journal.rtudarsjadvali.uz/uploads/image/image-1762415019023-309813695.jpg', required: false })
     @IsOptional()
     @IsString()
     image?: string
