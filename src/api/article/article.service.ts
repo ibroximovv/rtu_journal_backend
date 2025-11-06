@@ -6,7 +6,10 @@ import { PrismaService } from 'src/common/prisma/prisma.service';
 import { Request } from 'express';
 
 @Injectable()
-export class ArticleService extends BaseService<PrismaService, CreateArticleDto, UpdateArticleDto> {
+export class ArticleService extends BaseService<PrismaService['article'], CreateArticleDto, UpdateArticleDto> {
+  constructor(readonly prisma: PrismaService) {
+    super(prisma, prisma.article)
+  }
   async createWithUser(createArticleDto: CreateArticleDto, req: Request) {
     const user_id = req['user'].id
     const findone = await this.prisma.user.findFirst({ where: { id: user_id } })
